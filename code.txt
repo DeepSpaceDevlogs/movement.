@@ -1,0 +1,254 @@
+Code for game:
+
+2.5D movement:
+
+{
+    public float jumpForce = 10f;
+    public float moveSpeed = 5f;
+    public MeshRenderer meshRenderer;
+    public Animator animator;
+
+    private Rigidbody rb;
+    private bool isGrounded = true;
+    private bool isFacingRight = true;
+    private float jumpCooldown = 0f;
+
+    private void Start()
+    {
+        rb = GetComponent<Rigidbody>();
+        meshRenderer = GetComponent<MeshRenderer>();
+        animator.SetBool("IsWalking", false);
+    }
+
+    private void Update()
+    {
+        jumpCooldown += Time.deltaTime;
+
+        if (Input.GetKeyDown(KeyCode.Space) && isGrounded && jumpCooldown > 2.3f)
+        {
+            animator.SetBool("IsJumping", true);
+            rb.AddForce(new Vector3(0f, jumpForce, 0f), ForceMode.Impulse);
+            isGrounded = false;
+            jumpCooldown = 0f;
+        }
+
+        float horizontalInput = Input.GetAxis("Horizontal");
+        transform.position += new Vector3(horizontalInput, 0f, 0f) * Time.deltaTime * moveSpeed;
+
+        if (horizontalInput != 0f)
+        {
+            if (horizontalInput > 0f)
+            {
+                isFacingRight = true;
+            }
+            else
+            {
+                isFacingRight = false;
+            }
+            animator.SetBool("IsWalking", true);
+        }
+        else
+        {
+            animator.SetBool("IsWalking", false);
+        }
+
+        if (!isFacingRight)
+        {
+            meshRenderer.transform.localScale = new Vector3(-1f,1f, -1f);
+        }
+        else
+        {
+            meshRenderer.transform.localScale = new Vector3(1f, 1f, 1f);
+        }
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.CompareTag("Ground"))
+        {
+            isGrounded = true;
+            if (animator.GetBool("IsJumping"))
+            {
+                animator.SetBool("IsJumping", false);
+            }
+        }
+    }
+
+    private void OnCollisionExit(Collision collision)
+    {
+        if (collision.gameObject.CompareTag("Ground"))
+        {
+            isGrounded = false;
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+camera follow:
+
+{
+    #region Variables
+    
+        private Vector3 _offset;
+        [SerializeField] private Transform target;
+        [SerializeField] private float smoothTime;
+        private Vector3 _currentVelocity = Vector3.zero;
+        
+    #endregion
+    
+    #region Unity callbacks
+    
+        private void Awake() => _offset = transform.position - target.position;
+
+        private void LateUpdate()
+        {
+            Vector3 targetPosition = target.position + _offset;
+            transform.position = Vector3.SmoothDamp(transform.position, targetPosition, ref _currentVelocity, smoothTime);
+        }
+        
+    #endregion
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+3D movement:
+
+{
+    public float jumpForce = 10f;
+    public float moveSpeed = 5f;
+    public MeshRenderer meshRenderer;
+    public Animator animator;
+
+    private Rigidbody rb;
+    private bool isGrounded = true;
+    private bool isFacingRight = true;
+    private float jumpCooldown = 0f;
+
+    private void Start()
+    {
+        rb = GetComponent<Rigidbody>();
+        meshRenderer = GetComponent<MeshRenderer>();
+        animator.SetBool("IsWalking", false);
+    }
+
+    private void Update()
+{
+    jumpCooldown += Time.deltaTime;
+
+    if (Input.GetKeyDown(KeyCode.Space) && isGrounded && jumpCooldown > 2.3f)
+    {
+        animator.SetBool("IsJumping", true);
+        rb.AddForce(new Vector3(0f, jumpForce, 0f), ForceMode.Impulse);
+        isGrounded = false;
+        jumpCooldown = 0f;
+    }
+
+    float verticalInput = Input.GetAxis("Vertical");
+    float horizontalInput = Input.GetAxis("Horizontal");
+
+    // Check if left or right arrow key is pressed
+if (horizontalInput != 0f)
+{
+    if (horizontalInput < 0f)
+    {
+        // Set rotation to 180 degrees on y axis
+        transform.rotation = Quaternion.Euler(0f, 180f, 0f);
+    }
+    else
+    {
+        // Set rotation to 0 degrees on y axis
+        transform.rotation = Quaternion.Euler(0f, 180f, 0f);
+    }
+}
+// Check if up or down arrow key is pressed
+else if (verticalInput != 0f)
+{
+    if (verticalInput < 0f)
+    {
+        // Set rotation to 270 degrees on y axis
+        transform.rotation = Quaternion.Euler(0f, 90f, 0f);
+    }
+    else
+    {
+        // Set rotation to 90 degrees on y axis
+        transform.rotation = Quaternion.Euler(0f, 90f, 0f);
+    }
+}
+    transform.position += new Vector3(verticalInput, 0f, -horizontalInput) * Time.deltaTime * moveSpeed;
+    if (horizontalInput != 0f || verticalInput != 0f)
+    {
+        if (horizontalInput < 0f)
+        {
+            isFacingRight = false;
+        }
+        else if (horizontalInput > 0f)
+        {
+            isFacingRight = true;
+        }
+        else if (verticalInput > 0f)
+        {
+            isFacingRight = true;
+        }
+        else if (verticalInput < 0f)
+        {
+            isFacingRight = false;
+        }
+        animator.SetBool("IsWalking", true);
+    }
+    else
+    {
+        animator.SetBool("IsWalking", false);
+    }
+
+    if (!isFacingRight)
+    {
+        meshRenderer.transform.localScale = new Vector3(-1f, 1f, -1f);
+    }
+    else
+    {
+        meshRenderer.transform.localScale = new Vector3(1f, 1f, 1f);
+    }
+}
+private void OnCollisionEnter(Collision collision)
+{
+    if (collision.gameObject.CompareTag("Ground"))
+    {
+        isGrounded = true;
+        if (animator.GetBool("IsJumping"))
+        {
+            animator.SetBool("IsJumping", false);
+        }
+    }
+}
+
+private void OnCollisionExit(Collision collision)
+{
+    if (collision.gameObject.CompareTag("Ground"))
+    {
+        isGrounded = false;
+    }
+}
+}                                                     
